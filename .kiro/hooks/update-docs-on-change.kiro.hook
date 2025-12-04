@@ -3,11 +3,11 @@
   "description": "Automatically regenerate pdoc documentation when Python files are saved",
   "enabled": true,
   "trigger": {
-    "type": "onFileSave",
+    "type": "fileEdited",
     "filePattern": "backend/**/*.py"
   },
   "action": {
-    "type": "executeCommand",
-    "command": "cd backend && pdoc main.py -o docs --no-search && echo '✅ Documentation updated successfully'"
+    "type": "askAgent",
+    "message": "Regenerate the API documentation by running: cd backend && pdoc main.py -o docs --no-search"
   }
 }
