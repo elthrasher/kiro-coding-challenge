@@ -1,6 +1,6 @@
 # Implementation Plan: User Registration and Event Management
 
-- [ ] 1. Set up database tables and infrastructure
+- [x] 1. Set up database tables and infrastructure
   - Create UsersTable in DynamoDB with userId as partition key
   - Create RegistrationsTable with composite key (userId, eventId)
   - Add GSI eventId-userId-index to RegistrationsTable for reverse lookups
@@ -9,7 +9,7 @@
   - _Requirements: 1.1, 2.1, 3.1, 7.1_
 
 - [ ] 2. Implement user management
-- [ ] 2.1 Create user data models and validation
+- [x] 2.1 Create user data models and validation
   - Define UserCreate and User Pydantic models with validation rules
   - Implement validation for userId (alphanumeric, hyphens, underscores only)
   - Implement validation for name (non-empty, not all whitespace)
@@ -28,27 +28,27 @@
   - **Property 4: Whitespace userId rejection**
   - **Validates: Requirements 1.3, 1.4**
 
-- [ ] 2.5 Implement POST /users endpoint
+- [x] 2.5 Implement POST /users endpoint
   - Create user in UsersTable with timestamps
   - Use conditional write to prevent duplicate userIds
   - Return 201 Created with user object
   - Handle errors: 400 (validation), 409 (duplicate)
   - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-- [ ] 2.6 Implement GET /users/{userId} endpoint
+- [x] 2.6 Implement GET /users/{userId} endpoint
   - Retrieve user from UsersTable
   - Return 200 OK with user object
   - Handle errors: 404 (not found)
   - _Requirements: 1.1_
 
 - [ ] 3. Extend event management for registrations
-- [ ] 3.1 Update event data models
+- [x] 3.1 Update event data models
   - Add registeredCount, waitlistEnabled, and waitlist fields to Event model
   - Add computed fields: availableSpots, waitlistCount
   - Update EventCreate to accept waitlistEnabled parameter
   - _Requirements: 2.1, 2.2, 2.3_
 
-- [ ] 3.2 Update POST /events endpoint
+- [x] 3.2 Update POST /events endpoint
   - Initialize registeredCount to 0
   - Initialize waitlist to empty array
   - Set waitlistEnabled from request (default false)
@@ -60,14 +60,14 @@
   - **Validates: Requirements 2.1**
 
 - [ ] 4. Implement registration management core logic
-- [ ] 4.1 Create registration data models
+- [x] 4.1 Create registration data models
   - Define RegistrationCreate and Registration Pydantic models
   - Define RegistrationList model for query responses
   - Add status field with "confirmed" and "waitlist" values
   - Include denormalized event data (title, date) for convenience
   - _Requirements: 3.1, 4.1, 6.3, 6.4_
 
-- [ ] 4.2 Implement registration validation helper
+- [x] 4.2 Implement registration validation helper
   - Check user exists in UsersTable
   - Check event exists in EventsTable
   - Check user not already registered (query RegistrationsTable)
@@ -75,7 +75,7 @@
   - Return validation result with appropriate error codes
   - _Requirements: 3.2, 3.4, 3.5, 4.3_
 
-- [ ] 4.3 Implement capacity check and reservation logic
+- [x] 4.3 Implement capacity check and reservation logic
   - Query event to get current registeredCount and capacity
   - Determine if spot available, waitlist needed, or rejection required
   - Use conditional expressions for atomic capacity updates
@@ -91,7 +91,7 @@
   - **Validates: Requirements 3.2**
 
 - [ ] 5. Implement POST /users/{userId}/registrations endpoint
-- [ ] 5.1 Implement confirmed registration flow
+- [x] 5.1 Implement confirmed registration flow
   - Validate user and event exist
   - Check capacity available
   - Create registration record with status "confirmed"
@@ -109,7 +109,7 @@
   - **Property 12: Non-existent user rejection**
   - **Validates: Requirements 3.4, 3.5**
 
-- [ ] 5.4 Implement waitlist registration flow
+- [x] 5.4 Implement waitlist registration flow
   - Check if event at capacity and has waitlist enabled
   - Add userId to event waitlist array
   - Create registration record with status "waitlist"
@@ -130,7 +130,7 @@
   - **Validates: Requirements 4.4**
 
 - [ ] 6. Implement unregistration and waitlist promotion
-- [ ] 6.1 Implement basic unregistration logic
+- [x] 6.1 Implement basic unregistration logic
   - Validate registration exists
   - Delete registration record from RegistrationsTable
   - Atomically decrement event registeredCount
@@ -150,7 +150,7 @@
   - **Property 20: Unregistration persistence round-trip**
   - **Validates: Requirements 5.4**
 
-- [ ] 6.4 Implement automatic waitlist promotion
+- [x] 6.4 Implement automatic waitlist promotion
   - Check if event has non-empty waitlist after unregistration
   - Remove first user from waitlist array (FIFO)
   - Update their registration status from "waitlist" to "confirmed"
@@ -163,7 +163,7 @@
   - **Property 26: Atomic waitlist promotion**
   - **Validates: Requirements 5.2, 7.2**
 
-- [ ] 6.6 Implement waitlist unregistration
+- [x] 6.6 Implement waitlist unregistration
   - Check if registration status is "waitlist"
   - Remove userId from event waitlist array
   - Delete registration record
@@ -175,7 +175,7 @@
   - **Property 21: Waitlist removal preserves order**
   - **Validates: Requirements 5.5**
 
-- [ ] 6.8 Implement DELETE /users/{userId}/registrations/{eventId} endpoint
+- [x] 6.8 Implement DELETE /users/{userId}/registrations/{eventId} endpoint
   - Determine if registration is confirmed or waitlist
   - Call appropriate unregistration logic
   - Handle waitlist promotion if applicable

@@ -24,6 +24,48 @@ class ApiStack(Stack):
             point_in_time_recovery=True,
         )
         
+        # DynamoDB Table for Users
+        users_table = dynamodb.Table(
+            self, "UsersTable",
+            partition_key=dynamodb.Attribute(
+                name="userId",
+                type=dynamodb.AttributeType.STRING
+            ),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=RemovalPolicy.DESTROY,  # Change to RETAIN for production
+            point_in_time_recovery=True,
+        )
+        
+        # DynamoDB Table for Registrations
+        registrations_table = dynamodb.Table(
+            self, "RegistrationsTable",
+            partition_key=dynamodb.Attribute(
+                name="userId",
+                type=dynamodb.AttributeType.STRING
+            ),
+            sort_key=dynamodb.Attribute(
+                name="eventId",
+                type=dynamodb.AttributeType.STRING
+            ),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=RemovalPolicy.DESTROY,  # Change to RETAIN for production
+            point_in_time_recovery=True,
+        )
+        
+        # Add GSI for reverse lookups (by eventId)
+        registrations_table.add_global_secondary_index(
+            index_name="eventId-userId-index",
+            partition_key=dynamodb.Attribute(
+                name="eventId",
+                type=dynamodb.AttributeType.STRING
+            ),
+            sort_key=dynamodb.Attribute(
+                name="userId",
+                type=dynamodb.AttributeType.STRING
+            ),
+            projection_type=dynamodb.ProjectionType.ALL,
+        )
+        
         # Lambda Layer for dependencies
         dependencies_layer = lambda_.LayerVersion(
             self, "DependenciesLayer",
@@ -54,11 +96,15 @@ class ApiStack(Stack):
             architecture=lambda_.Architecture.ARM_64,
             environment={
                 "EVENTS_TABLE_NAME": events_table.table_name,
+                "USERS_TABLE_NAME": users_table.table_name,
+                "REGISTRATIONS_TABLE_NAME": registrations_table.table_name,
             }
         )
         
         # Grant Lambda permissions to access DynamoDB
         events_table.grant_read_write_data(api_lambda)
+        users_table.grant_read_write_data(api_lambda)
+        registrations_table.grant_read_write_data(api_lambda)
         
         # API Gateway REST API
         api = apigateway.LambdaRestApi(
