@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# CDK
+cdk.out/
+.cdk.staging/
+
+# Credentials - DO NOT COMMIT
+infrastructure/watch-with-creds.sh
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
